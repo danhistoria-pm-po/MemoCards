@@ -13,12 +13,26 @@ void main() {
     }
   });
 
-  testWidgets('Sessão completa: pontua, abre resultado e reinicia o deck',
+  testWidgets('DeckSelectionScreen lista todos os decks disponíveis',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MemoCardsApp());
 
-    // Estado inicial: primeiro card do deck Era Vargas.
-    expect(find.text('MemoCards'), findsOneWidget);
+    expect(find.text('Escolha seu Deck'), findsOneWidget);
+    expect(find.text('Era Vargas'), findsOneWidget);
+    expect(find.text('Geopolítica Contemporânea'), findsOneWidget);
+    expect(find.text('3 cartões'), findsNWidgets(2));
+  });
+
+  testWidgets(
+      'Fluxo completo: seleciona deck, estuda, abre resultado e reinicia',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MemoCardsApp());
+
+    // Abre o primeiro deck ("Era Vargas").
+    await tester.tap(find.text('Era Vargas'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Era Vargas'), findsOneWidget);
     expect(find.text('1 / 3'), findsOneWidget);
     expect(find.text('O que foi a Revolução de 1930?'), findsOneWidget);
 
@@ -46,9 +60,15 @@ void main() {
     expect(find.text('O que foi a Revolução de 1930?'), findsOneWidget);
   });
 
-  testWidgets('Pontuação zera ao reiniciar o deck',
+  testWidgets('Selecionar segundo deck exibe suas perguntas e zera ao reiniciar',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MemoCardsApp());
+
+    await tester.tap(find.text('Geopolítica Contemporânea'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Geopolítica Contemporânea'), findsOneWidget);
+    expect(find.text('O que caracteriza a Nova Ordem Mundial?'), findsOneWidget);
 
     // 1ª rodada: 3 acertos.
     for (var i = 0; i < 3; i++) {
@@ -71,6 +91,9 @@ void main() {
   testWidgets('FlipCard exibe a resposta após o toque',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MemoCardsApp());
+
+    await tester.tap(find.text('Era Vargas'));
+    await tester.pumpAndSettle();
 
     expect(find.text('PERGUNTA'), findsOneWidget);
 

@@ -16,18 +16,26 @@ Foco exclusivo na funcionalidade central de revisão offline:
 ## 🏗️ Arquitetura (Clean Architecture - Feature First)
 O projeto foi estruturado para escalar futuramente com integrações de IA (Gemini API) e Backend as a Service (Firebase/Supabase).
 
-> **Status atual:** Estrutura planejada para o MVP (no momento, apenas `lib/main.dart` está criado no repositório).
-
 ```text
 lib/
 ├── core/
-│   └── constants/        # Tema, cores e constantes de UI
+│   └── constants/
+│       └── app_fonts.dart                     # Fontes locais (Poppins offline)
 ├── features/
 │   └── flashcards/
-│       ├── domain/       # Modelos (DeckModel, FlashcardModel)
-│       ├── data/         # Dados mockados (Curadoria Prof. Danny)
-│       └── presentation/ # Telas e Widgets (StudyScreen, FlipCardWidget)
-└── main.dart             # Ponto de entrada limpo
+│       ├── domain/
+│       │   ├── deck_model.dart                # Modelo de Deck
+│       │   └── flashcard_model.dart           # Modelo de Flashcard
+│       ├── data/
+│       │   └── mock_decks.dart                # Dados mockados (Curadoria Prof. Danny)
+│       └── presentation/
+│           ├── screens/
+│           │   ├── deck_selection_screen.dart # Seleção de Decks
+│           │   ├── study_screen.dart          # Sessão de estudo
+│           │   └── result_screen.dart         # Pontuação final da sessão
+│           └── widgets/
+│               └── flip_card_widget.dart      # Cartão 3D interativo
+└── main.dart                                  # Ponto de entrada limpo
 ```
 
 ## 🛠️ Stack Tecnológica

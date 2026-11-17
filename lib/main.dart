@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/constants/app_fonts.dart';
-import 'features/flashcards/presentation/screens/study_screen.dart';
+import 'features/flashcards/presentation/screens/deck_selection_screen.dart';
 
 void main() {
   runApp(const MemoCardsApp());
@@ -34,7 +34,7 @@ class MemoCardsApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const StudyScreen(),
+      home: const DeckSelectionScreen(),
     );
   }
 }
