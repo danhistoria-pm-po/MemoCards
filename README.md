@@ -8,10 +8,10 @@ O **MemoCards** é um aplicativo educacional (MVP) focado em combater a "curva d
 Foco exclusivo na funcionalidade central de revisão offline:
 
 - **Seleção de Decks:** Listagem de temas focados em História e Geografia.
-- **Sessão de Flashcards:** Interface limpa com cartões de pergunta (frente) e resposta (verso).
+- **Sessão de Flashcards:** Interface limpa com cartões de pergunta (frente) e resposta (verso), em tamanho responsivo para celular, tablet e paisagem.
 - **Motor 3D (FlipCard):** Animação fluida de rotação utilizando `AnimationController` e `Transform(Matrix4)`.
-- **Autoavaliação:** Botões de feedback (Acertei/Errei) para avanço de fila.
-- **Resultado:** Tela de pontuação final da sessão.
+- **Autoavaliação:** Botões de feedback (Acertei/Errei). Cartões marcados como "Errei" voltam para o fim da fila até serem acertados.
+- **Resultado:** Tela de pontuação final da sessão (acertos de primeira), com opção de revisar novamente ou voltar à seleção de decks.
 
 ## 🏗️ Arquitetura (Clean Architecture - Feature First)
 O projeto foi estruturado para escalar futuramente com integrações de IA (Gemini API) e Backend as a Service (Firebase/Supabase).
@@ -20,7 +20,8 @@ O projeto foi estruturado para escalar futuramente com integrações de IA (Gemi
 lib/
 ├── core/
 │   └── constants/
-│       └── app_fonts.dart                     # Fontes locais (Poppins offline)
+│       ├── app_fonts.dart                     # Fontes locais (Poppins offline)
+│       └── app_strings.dart                   # Textos de UI centralizados (pré-l10n)
 ├── features/
 │   └── flashcards/
 │       ├── domain/
@@ -40,7 +41,7 @@ lib/
 
 ## 🛠️ Stack Tecnológica
 
-- **Framework:** Flutter (Dart `^3.13.5`)
+- **Framework:** Flutter `>=3.27` (testado com Flutter `3.47.7` / Dart `3.13.5`)
 - **Gestão de Estado:** Nativa (`setState` para MVP)
 - **Animações:** Flutter Animations (Tween, Matrix4)
 - **Design Pattern:** Feature-First Clean Architecture
@@ -48,7 +49,7 @@ lib/
 ## ▶️ Como Executar
 
 ### Pré-requisitos
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) instalado (com Dart `^3.13.5`)
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) `3.27` ou superior (Dart `^3.13.5`)
 - Emulador Android/iOS, dispositivo físico ou navegador/desktop habilitado
 
 ### Passos
@@ -60,8 +61,9 @@ flutter pub get
 flutter run
 ```
 
-### Testes
+### Testes e análise estática
 ```bash
+flutter analyze
 flutter test
 ```
 

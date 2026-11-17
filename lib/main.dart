@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/constants/app_fonts.dart';
+import 'core/constants/app_strings.dart';
 import 'features/flashcards/presentation/screens/deck_selection_screen.dart';
 
 void main() {
@@ -14,7 +15,7 @@ class MemoCardsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MemoCards',
+      title: AppStrings.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

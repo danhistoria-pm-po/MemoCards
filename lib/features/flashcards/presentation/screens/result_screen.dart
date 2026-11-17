@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_fonts.dart';
+import '../../../../core/constants/app_strings.dart';
 
 /// Tela exibida ao final da sessão de estudo com a pontuação obtida.
+///
+/// - "Revisar Novamente" volta para a sessão (que reinicia o deck).
+/// - "Escolher outro Deck" volta direto para a seleção de decks.
 class ResultScreen extends StatelessWidget {
-  /// Quantidade de cards marcados como "Acertei".
+  /// Quantidade de cards acertados de primeira.
   final int score;
 
   /// Quantidade total de cards da sessão.
@@ -32,7 +36,7 @@ class ResultScreen extends StatelessWidget {
                 const _AnimatedTrophy(),
                 const SizedBox(height: 32),
                 Text(
-                  'Você acertou $score de $totalCards!',
+                  AppStrings.resultScore(score, totalCards),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: AppFonts.poppins,
@@ -47,7 +51,7 @@ class ResultScreen extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.replay_rounded),
-                    label: const Text('Revisar Novamente'),
+                    label: const Text(AppStrings.reviewAgain),
                     style: _buttonStyle(
                       background: Colors.deepPurpleAccent,
                       foreground: Colors.white,
@@ -58,9 +62,11 @@ class ResultScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
+                    // Volta até a raiz da navegação (DeckSelectionScreen).
+                    onPressed: () =>
+                        Navigator.popUntil(context, (route) => route.isFirst),
                     icon: const Icon(Icons.grid_view_rounded),
-                    label: const Text('Escolher outro Deck'),
+                    label: const Text(AppStrings.chooseAnotherDeck),
                     style: _buttonStyle(
                       background: Colors.white,
                       foreground: _darkPurple,
@@ -126,6 +132,7 @@ class _AnimatedTrophy extends StatelessWidget {
           Icons.emoji_events_rounded,
           size: 96,
           color: Colors.amberAccent,
+          semanticLabel: AppStrings.trophySemantics,
         ),
       ),
     );

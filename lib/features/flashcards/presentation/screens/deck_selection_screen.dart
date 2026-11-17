@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_fonts.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../data/mock_decks.dart';
 import '../../domain/deck_model.dart';
 import 'study_screen.dart';
@@ -21,7 +22,7 @@ class DeckSelectionScreen extends StatelessWidget {
         foregroundColor: _darkPurple,
         elevation: 0,
         title: const Text(
-          'Escolha seu Deck',
+          AppStrings.deckSelectionTitle,
           style: TextStyle(
             fontFamily: AppFonts.poppins,
             fontSize: 22,
@@ -63,10 +64,11 @@ class _DeckCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardCount = deck.cards.length;
-    final countLabel = cardCount == 1 ? '1 cartão' : '$cardCount cartões';
+    final countLabel = AppStrings.cardCount(deck.cards.length);
 
-    return Card(
+    return Semantics(
+      onTapHint: AppStrings.startDeckHint,
+      child: Card(
       color: Colors.white,
       elevation: 3,
       shadowColor: Colors.deepPurple.withValues(alpha: 0.14),
@@ -142,6 +144,7 @@ class _DeckCard extends StatelessWidget {
           size: 36,
         ),
         onTap: onTap,
+      ),
       ),
     );
   }

@@ -3,13 +3,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_fonts.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../domain/flashcard_model.dart';
 
 /// Cartão interativo que gira em 3D (eixo Y) ao ser tocado,
 /// alternando entre a pergunta (frente) e a resposta (verso).
 ///
 /// O cartão ocupa todo o espaço recebido; posicione-o dentro de um widget
-/// com tamanho definido (ex.: `SizedBox(width: 350, height: 400)`).
+/// com tamanho definido (a `StudyScreen` calcula o tamanho de forma responsiva).
 class FlipCardWidget extends StatefulWidget {
   /// Flashcard exibido pelo cartão.
   final FlashcardModel flashcard;
@@ -68,21 +69,25 @@ class _FlipCardWidgetState extends State<FlipCardWidget>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          final bool isFront = _animation.value < 0.5;
+    return Semantics(
+      button: true,
+      onTapHint: AppStrings.flipCardHint,
+      child: GestureDetector(
+        onTap: _handleTap,
+        child: AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            final bool isFront = _animation.value < 0.5;
 
-          return Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001)
-              ..rotateY(math.pi * _animation.value),
-            child: isFront ? _buildFront() : _buildBack(),
-          );
-        },
+            return Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateY(math.pi * _animation.value),
+              child: isFront ? _buildFront() : _buildBack(),
+            );
+          },
+        ),
       ),
     );
   }
@@ -98,7 +103,7 @@ class _FlipCardWidgetState extends State<FlipCardWidget>
           color: Colors.amber,
           size: 20,
         ),
-        label: 'PERGUNTA',
+        label: AppStrings.questionLabel,
         labelColor: _darkPurple,
         text: widget.flashcard.question,
         textStyle: const TextStyle(
@@ -108,7 +113,7 @@ class _FlipCardWidgetState extends State<FlipCardWidget>
           fontWeight: FontWeight.w600,
           height: 1.4,
         ),
-        hint: 'Toque para ver a resposta',
+        hint: AppStrings.tapToRevealAnswer,
         hintColor: _mutedText,
       ),
     );
@@ -129,7 +134,7 @@ class _FlipCardWidgetState extends State<FlipCardWidget>
         alignment: Alignment.center,
         transform: Matrix4.identity()..rotateY(math.pi),
         child: _CardContent(
-          label: 'RESPOSTA',
+          label: AppStrings.answerLabel,
           labelColor: Colors.white,
           text: widget.flashcard.answer,
           textStyle: const TextStyle(
@@ -139,7 +144,7 @@ class _FlipCardWidgetState extends State<FlipCardWidget>
             fontWeight: FontWeight.w500,
             height: 1.45,
           ),
-          hint: 'Toque para voltar à pergunta',
+          hint: AppStrings.tapToShowQuestion,
           hintColor: Colors.white,
         ),
       ),
@@ -163,24 +168,32 @@ class _CardSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(28),
-        border: borderColor != null ? Border.all(color: borderColor!) : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.deepPurple.withValues(alpha: 0.18),
-            blurRadius: 28,
-            offset: const Offset(0, 14),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Em cartões baixos (ex.: paisagem), reduz o respiro interno.
+        final isCompact = constraints.maxHeight < 320;
+
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          padding: EdgeInsets.all(isCompact ? 16 : 28),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(28),
+            border:
+                borderColor != null ? Border.all(color: borderColor!) : null,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.deepPurple.withValues(alpha: 0.18),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: child,
+          child: child,
+        );
+      },
     );
   }
 }
@@ -216,14 +229,16 @@ class _CardContent extends StatelessWidget {
               labelIcon!,
               const SizedBox(width: 6),
             ],
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: AppFonts.poppins,
-                color: labelColor,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 2,
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontFamily: AppFonts.poppins,
+                  color: labelColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2,
+                ),
               ),
             ),
           ],
