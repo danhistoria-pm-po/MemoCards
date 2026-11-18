@@ -18,17 +18,37 @@ O projeto foi estruturado para escalar futuramente com integrações de IA (Gemi
 
 ```text
 lib/
+├── bootstrap.dart                             # Inicialização e carga do seed local
 ├── core/
-│   └── constants/
-│       ├── app_fonts.dart                     # Fontes locais (Poppins offline)
-│       └── app_strings.dart                   # Textos de UI centralizados (pré-l10n)
+│   ├── constants/
+│   │   ├── app_colors.dart                    # Paleta oficial do MemoCards
+│   │   ├── app_fonts.dart                     # Fontes locais (Poppins offline)
+│   │   └── app_strings.dart                   # Textos de UI centralizados (pré-l10n)
+│   ├── database/
+│   │   ├── app_database.dart                  # Banco SQLite local (Drift)
+│   │   ├── app_database.g.dart                # Código gerado pelo drift_dev
+│   │   └── tables.dart                        # Tabelas locais (decks, cards, SRS)
+│   ├── di/
+│   │   └── providers.dart                     # Injeção de dependências (Riverpod)
+│   ├── errors/
+│   │   ├── failure.dart                       # Hierarquia de falhas de domínio
+│   │   └── result.dart                        # Tipo Result<T>
+│   ├── router/
+│   │   └── app_router.dart                    # Rotas declarativas (go_router)
+│   ├── theme/
+│   │   └── app_theme.dart                     # ThemeData global
+│   └── utils/
+│       └── clock.dart                         # Abstração de relógio para testes
 ├── features/
 │   └── flashcards/
 │       ├── domain/
-│       │   ├── deck_model.dart                # Modelo de Deck
-│       │   └── flashcard_model.dart           # Modelo de Flashcard
+│       │   ├── entities/                      # Deck, Flashcard, DeckStatus
+│       │   ├── repositories/                  # DeckRepository (interface)
+│       │   └── usecases/                      # WatchDecks, WatchDeckById, SeedInitialDecks
 │       ├── data/
-│       │   └── mock_decks.dart                # Dados mockados (Curadoria Prof. Danny)
+│       │   ├── datasources/                   # DeckLocalDatasource, SeedAssetDatasource
+│       │   ├── mappers/                       # DeckMapper
+│       │   └── repositories/                  # DeckRepositoryImpl
 │       └── presentation/
 │           ├── screens/
 │           │   ├── deck_selection_screen.dart # Seleção de Decks
@@ -42,7 +62,9 @@ lib/
 ## 🛠️ Stack Tecnológica
 
 - **Framework:** Flutter `>=3.27` (testado com Flutter `3.47.7` / Dart `3.13.5`)
-- **Gestão de Estado:** Nativa (`setState` para MVP)
+- **Gestão de Estado:** Riverpod (`flutter_riverpod`)
+- **Roteamento:** `go_router`
+- **Persistência Local:** Drift (SQLite offline-first com suporte Android e Web) + seed em `assets/seed/decks.json`
 - **Animações:** Flutter Animations (Tween, Matrix4)
 - **Design Pattern:** Feature-First Clean Architecture
 

@@ -9,6 +9,10 @@ abstract final class AppStrings {
   // Seleção de decks
   static const String deckSelectionTitle = 'Escolha seu Deck';
   static const String startDeckHint = 'iniciar o estudo deste deck';
+  static const String emptyDecksList = 'Nenhum deck disponível no momento.';
+  static const String loadDecksError = 'Não foi possível carregar os decks.';
+  static const String deckNotFound = 'Deck não encontrado.';
+  static const String backToDecks = 'Voltar aos Decks';
   static String cardCount(int count) =>
       count == 1 ? '1 cartão' : '$count cartões';
 

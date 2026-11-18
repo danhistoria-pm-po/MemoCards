@@ -1,41 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/constants/app_fonts.dart';
+import 'bootstrap.dart';
 import 'core/constants/app_strings.dart';
-import 'features/flashcards/presentation/screens/deck_selection_screen.dart';
+import 'core/router/app_router.dart';
+import 'core/theme/app_theme.dart';
 
-void main() {
-  runApp(const MemoCardsApp());
+Future<void> main() async {
+  await bootstrap();
 }
 
 /// Widget raiz do aplicativo MemoCards.
-class MemoCardsApp extends StatelessWidget {
+class MemoCardsApp extends ConsumerWidget {
   const MemoCardsApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(appRouterProvider);
+
+    return MaterialApp.router(
       title: AppStrings.appTitle,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: AppFonts.poppins,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurpleAccent),
-        scaffoldBackgroundColor: const Color(0xFFF4F0FE),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF4C1D95),
-          foregroundColor: Colors.white,
-          centerTitle: false,
-          elevation: 0,
-          titleTextStyle: TextStyle(
-            fontFamily: AppFonts.poppins,
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-      home: const DeckSelectionScreen(),
+      theme: AppTheme.light(),
+      routerConfig: router,
     );
   }
 }

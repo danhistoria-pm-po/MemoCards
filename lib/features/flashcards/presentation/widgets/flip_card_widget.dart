@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_fonts.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../domain/flashcard_model.dart';
+import '../../domain/entities/flashcard.dart';
 
 /// Cartão interativo que gira em 3D (eixo Y) ao ser tocado,
 /// alternando entre a pergunta (frente) e a resposta (verso).
@@ -13,7 +13,7 @@ import '../../domain/flashcard_model.dart';
 /// com tamanho definido (a `StudyScreen` calcula o tamanho de forma responsiva).
 class FlipCardWidget extends StatefulWidget {
   /// Flashcard exibido pelo cartão.
-  final FlashcardModel flashcard;
+  final Flashcard flashcard;
 
   const FlipCardWidget({super.key, required this.flashcard});
 

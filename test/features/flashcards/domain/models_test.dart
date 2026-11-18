@@ -1,70 +1,107 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:memocards/features/flashcards/data/mock_decks.dart';
-import 'package:memocards/features/flashcards/domain/deck_model.dart';
-import 'package:memocards/features/flashcards/domain/flashcard_model.dart';
+import 'package:memocards/features/flashcards/data/datasources/seed_asset_datasource.dart';
+import 'package:memocards/features/flashcards/domain/entities/deck.dart';
+import 'package:memocards/features/flashcards/domain/entities/deck_status.dart';
+import 'package:memocards/features/flashcards/domain/entities/flashcard.dart';
 
 void main() {
-  group('FlashcardModel', () {
-    test('armazena id, pergunta e resposta', () {
-      const card = FlashcardModel(id: 'c1', question: 'P?', answer: 'R.');
+  final fixedDate = DateTime.utc(2026, 11, 17);
 
-      expect(card.id, 'c1');
-      expect(card.question, 'P?');
-      expect(card.answer, 'R.');
-    });
+  group('Flashcard', () {
+    test('armazena propriedades e implementa igualdade por valor', () {
+      final a = Flashcard(
+        id: 'c1',
+        deckId: 'd1',
+        question: 'P?',
+        answer: 'R.',
+        sortOrder: 0,
+        createdAt: fixedDate,
+        updatedAt: fixedDate,
+      );
+      final b = Flashcard(
+        id: 'c1',
+        deckId: 'd1',
+        question: 'P?',
+        answer: 'R.',
+        sortOrder: 0,
+        createdAt: fixedDate,
+        updatedAt: fixedDate,
+      );
 
-    test('instâncias const idênticas são canonicalizadas', () {
-      const a = FlashcardModel(id: 'c1', question: 'P?', answer: 'R.');
-      const b = FlashcardModel(id: 'c1', question: 'P?', answer: 'R.');
-
-      expect(identical(a, b), isTrue);
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
     });
   });
 
-  group('DeckModel', () {
+  group('Deck', () {
     test('armazena metadados e preserva a ordem dos cards', () {
-      const deck = DeckModel(
+      final deck = Deck(
         id: 'd1',
         title: 'Título',
         description: 'Descrição',
+        status: DeckStatus.published,
+        isSeed: true,
+        isCurated: true,
         cards: [
-          FlashcardModel(id: 'c1', question: 'P1', answer: 'R1'),
-          FlashcardModel(id: 'c2', question: 'P2', answer: 'R2'),
+          Flashcard(
+            id: 'c1',
+            deckId: 'd1',
+            question: 'P1',
+            answer: 'R1',
+            sortOrder: 0,
+            createdAt: fixedDate,
+            updatedAt: fixedDate,
+          ),
+          Flashcard(
+            id: 'c2',
+            deckId: 'd1',
+            question: 'P2',
+            answer: 'R2',
+            sortOrder: 1,
+            createdAt: fixedDate,
+            updatedAt: fixedDate,
+          ),
         ],
+        createdAt: fixedDate,
+        updatedAt: fixedDate,
       );
 
       expect(deck.id, 'd1');
-      expect(deck.title, 'Título');
-      expect(deck.description, 'Descrição');
+      expect(deck.status, DeckStatus.published);
       expect(deck.cards.map((c) => c.id), ['c1', 'c2']);
     });
 
-    test('aceita deck sem cards', () {
-      const deck = DeckModel(id: 'd0', title: 'T', description: 'D', cards: []);
-
-      expect(deck.cards, isEmpty);
+    test('DeckStatus.fromStorage converte valores conhecidos e fallback', () {
+      expect(DeckStatus.fromStorage('draft'), DeckStatus.draft);
+      expect(DeckStatus.fromStorage('published'), DeckStatus.published);
+      expect(DeckStatus.fromStorage('desconhecido'), DeckStatus.published);
     });
   });
 
-  group('mockDecks (curadoria Prof. Danny)', () {
-    test('possui decks com ids únicos', () {
-      final ids = mockDecks.map((d) => d.id).toList();
+  group('Seed JSON (assets/seed/decks.json)', () {
+    test('possui decks e cards válidos com ids únicos e textos preenchidos',
+        () async {
+      final raw = await File('assets/seed/decks.json').readAsString();
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      final decks = (decoded['decks'] as List<dynamic>)
+          .map((e) => SeedDeckDto.fromJson(e as Map<String, dynamic>))
+          .toList();
 
-      expect(ids, isNotEmpty);
-      expect(ids.toSet().length, ids.length);
-    });
+      expect(decks, isNotEmpty);
 
-    test('ids de cards são únicos entre todos os decks', () {
-      final ids = [
-        for (final deck in mockDecks) ...deck.cards.map((c) => c.id),
+      final deckIds = decks.map((d) => d.id).toList();
+      expect(deckIds.toSet().length, deckIds.length);
+
+      final cardIds = [
+        for (final deck in decks) ...deck.cards.map((c) => c.id),
       ];
+      expect(cardIds.toSet().length, cardIds.length);
 
-      expect(ids.toSet().length, ids.length);
-    });
-
-    test('nenhum deck ou card possui texto vazio', () {
-      for (final deck in mockDecks) {
+      for (final deck in decks) {
         expect(deck.title.trim(), isNotEmpty);
         expect(deck.description.trim(), isNotEmpty);
         expect(deck.cards, isNotEmpty, reason: deck.title);

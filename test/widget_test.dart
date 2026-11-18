@@ -1,12 +1,143 @@
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:memocards/core/di/providers.dart';
+import 'package:memocards/core/errors/result.dart';
+import 'package:memocards/features/flashcards/domain/entities/deck.dart';
+import 'package:memocards/features/flashcards/domain/entities/deck_status.dart';
+import 'package:memocards/features/flashcards/domain/entities/flashcard.dart';
+import 'package:memocards/features/flashcards/domain/repositories/deck_repository.dart';
 import 'package:memocards/features/flashcards/presentation/widgets/flip_card_widget.dart';
 import 'package:memocards/main.dart';
 
-/// Abre o deck indicado a partir da tela inicial.
+class _FakeDeckRepository implements DeckRepository {
+  static final _now = DateTime.utc(2026, 11, 17);
+
+  static final List<Deck> _decks = [
+    Deck(
+      id: '1',
+      title: 'Era Vargas',
+      description: 'Revisão essencial sobre o período varguista para o ENEM.',
+      status: DeckStatus.published,
+      isSeed: true,
+      isCurated: true,
+      createdAt: _now,
+      updatedAt: _now,
+      cards: [
+        Flashcard(
+          id: '101',
+          deckId: '1',
+          question: 'O que foi a Revolução de 1930?',
+          answer:
+              'Movimento que depôs Washington Luís e colocou Getúlio Vargas no poder, pondo fim à República Oligárquica.',
+          sortOrder: 0,
+          createdAt: _now,
+          updatedAt: _now,
+        ),
+        Flashcard(
+          id: '102',
+          deckId: '1',
+          question: 'Qual a principal característica do Estado Novo (1937-1945)?',
+          answer:
+              'Ditadura de Vargas marcada por centralização, censura (DIP) e criação de direitos trabalhistas (CLT).',
+          sortOrder: 1,
+          createdAt: _now,
+          updatedAt: _now,
+        ),
+        Flashcard(
+          id: '103',
+          deckId: '1',
+          question: 'O que foi o movimento Queremismo?',
+          answer:
+              'Movimento popular no fim do Estado Novo que defendia a permanência de Vargas no poder e uma nova constituinte.',
+          sortOrder: 2,
+          createdAt: _now,
+          updatedAt: _now,
+        ),
+      ],
+    ),
+    Deck(
+      id: '2',
+      title: 'Geopolítica Contemporânea',
+      description: 'Conceitos fundamentais de Geografia para vestibulares.',
+      status: DeckStatus.published,
+      isSeed: true,
+      isCurated: true,
+      createdAt: _now,
+      updatedAt: _now,
+      cards: [
+        Flashcard(
+          id: '201',
+          deckId: '2',
+          question: 'O que caracteriza a Nova Ordem Mundial?',
+          answer:
+              'Configuração pós-Guerra Fria, marcada pela multipolaridade econômica e unipolaridade militar (hegemonia dos EUA).',
+          sortOrder: 0,
+          createdAt: _now,
+          updatedAt: _now,
+        ),
+        Flashcard(
+          id: '202',
+          deckId: '2',
+          question: 'O que é Gentrificação?',
+          answer:
+              'Revitalização de espaços urbanos que encarece o custo de vida e expulsa a população de baixa renda para as periferias.',
+          sortOrder: 1,
+          createdAt: _now,
+          updatedAt: _now,
+        ),
+        Flashcard(
+          id: '203',
+          deckId: '2',
+          question: 'Qual a diferença entre Estado e Nação?',
+          answer:
+              'Estado é a instituição política e jurídica (governo, território). Nação é o sentimento de pertencimento, cultura e identidade de um povo.',
+          sortOrder: 2,
+          createdAt: _now,
+          updatedAt: _now,
+        ),
+      ],
+    ),
+  ];
+
+  @override
+  Future<Result<Deck?>> getDeckById(String deckId) async {
+    for (final deck in _decks) {
+      if (deck.id == deckId) return Success(deck);
+    }
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> seedIfNeeded() async => const Success(null);
+
+  @override
+  Stream<Deck?> watchDeckById(String deckId) {
+    for (final deck in _decks) {
+      if (deck.id == deckId) return Stream.value(deck);
+    }
+    return Stream.value(null);
+  }
+
+  @override
+  Stream<List<Deck>> watchDecks() => Stream.value(_decks);
+}
+
+Future<void> _pumpApp(WidgetTester tester) async {
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        deckRepositoryProvider.overrideWithValue(_FakeDeckRepository()),
+      ],
+      child: const MemoCardsApp(),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 Future<void> _openDeck(WidgetTester tester, String title) async {
-  await tester.pumpWidget(const MemoCardsApp());
+  await _pumpApp(tester);
   await tester.tap(find.text(title));
   await tester.pumpAndSettle();
 }
@@ -16,7 +147,6 @@ Future<void> _answer(WidgetTester tester, String label) async {
   await tester.pumpAndSettle();
 }
 
-/// Define o tamanho lógico da tela para o teste.
 void _setLogicalScreenSize(WidgetTester tester, Size size) {
   tester.view.devicePixelRatio = 2.0;
   tester.view.physicalSize = size * 2.0;
@@ -34,8 +164,8 @@ void main() {
   });
 
   group('DeckSelectionScreen', () {
-    testWidgets('lista todos os decks disponíveis', (tester) async {
-      await tester.pumpWidget(const MemoCardsApp());
+    testWidgets('lista os decks disponíveis via Riverpod', (tester) async {
+      await _pumpApp(tester);
 
       expect(find.text('Escolha seu Deck'), findsOneWidget);
       expect(find.text('Era Vargas'), findsOneWidget);
@@ -52,22 +182,21 @@ void main() {
       expect(find.text('1 / 3'), findsOneWidget);
       expect(find.text('O que foi a Revolução de 1930?'), findsOneWidget);
 
-      await _answer(tester, 'Acertei'); // card 101 de primeira
+      await _answer(tester, 'Acertei');
       expect(find.text('2 / 3'), findsOneWidget);
 
-      await _answer(tester, 'Errei'); // card 102 volta para a fila
+      await _answer(tester, 'Errei');
       expect(find.text('3 / 4'), findsOneWidget);
 
-      await _answer(tester, 'Acertei'); // card 103 de primeira
+      await _answer(tester, 'Acertei');
       expect(find.text('4 / 4'), findsOneWidget);
       expect(
         find.text('Qual a principal característica do Estado Novo (1937-1945)?'),
         findsOneWidget,
       );
 
-      await _answer(tester, 'Acertei'); // card 102 na repetição
+      await _answer(tester, 'Acertei');
 
-      // Pontuação conta apenas acertos de primeira.
       expect(find.text('Você acertou 2 de 3!'), findsOneWidget);
 
       await _answer(tester, 'Revisar Novamente');
@@ -79,19 +208,17 @@ void main() {
         (tester) async {
       await _openDeck(tester, 'Era Vargas');
 
-      await _answer(tester, 'Errei'); // 101 vai para o fim
+      await _answer(tester, 'Errei');
       expect(find.text('2 / 4'), findsOneWidget);
       expect(find.text('O que foi a Revolução de 1930?'), findsNothing);
 
-      await _answer(tester, 'Acertei'); // 102
-      await _answer(tester, 'Acertei'); // 103
+      await _answer(tester, 'Acertei');
+      await _answer(tester, 'Acertei');
 
-      // 101 volta, exibindo a frente do cartão.
       expect(find.text('4 / 4'), findsOneWidget);
       expect(find.text('O que foi a Revolução de 1930?'), findsOneWidget);
       expect(find.text('PERGUNTA'), findsOneWidget);
 
-      // Vira o cartão e erra de novo: mesmo card volta pela frente.
       await tester.tap(find.byType(FlipCardWidget));
       await tester.pumpAndSettle();
       expect(find.text('RESPOSTA'), findsOneWidget);
@@ -118,7 +245,6 @@ void main() {
 
       await _answer(tester, 'Revisar Novamente');
 
-      // Erra todos uma vez e depois acerta as repetições: 0 de primeira.
       for (var i = 0; i < 3; i++) {
         await _answer(tester, 'Errei');
       }
@@ -157,7 +283,6 @@ void main() {
       expect(find.text('Errei'), findsNothing);
       expect(find.byType(FlipCardWidget), findsNothing);
 
-      // A partir da lista é possível abrir outro deck normalmente.
       await tester.tap(find.text('Geopolítica Contemporânea'));
       await tester.pumpAndSettle();
       expect(find.text('1 / 3'), findsOneWidget);

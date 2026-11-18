@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_fonts.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/router/app_router.dart';
 
 /// Tela exibida ao final da sessão de estudo com a pontuação obtida.
 ///
@@ -49,7 +52,7 @@ class ResultScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => context.pop(),
                     icon: const Icon(Icons.replay_rounded),
                     label: const Text(AppStrings.reviewAgain),
                     style: _buttonStyle(
@@ -63,13 +66,12 @@ class ResultScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     // Volta até a raiz da navegação (DeckSelectionScreen).
-                    onPressed: () =>
-                        Navigator.popUntil(context, (route) => route.isFirst),
+                    onPressed: () => context.go(AppRoutes.home),
                     icon: const Icon(Icons.grid_view_rounded),
                     label: const Text(AppStrings.chooseAnotherDeck),
                     style: _buttonStyle(
                       background: Colors.white,
-                      foreground: _darkPurple,
+                      foreground: AppColors.darkPurple,
                     ),
                   ),
                 ),
